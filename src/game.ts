@@ -16,7 +16,7 @@ export class Game extends Container {
 
   app: Application;
   player: Player;
-  platform: Platform;
+  platforms: Platform[] = [];
 
   constructor(app: Application) {
     super();
@@ -27,10 +27,16 @@ export class Game extends Container {
     this.player.setup();
     this.player.position.set(100, 5);
 
-    this.platform = new Platform();
-    this.addChild(this.platform);
-    this.platform.setup();
-    this.platform.position.set(200, 200);
+    const platform1 = new Platform(200, 200);
+    const platform2 = new Platform(300, 300);
+    const platform3 = new Platform(400, 400);
+    const platform4 = new Platform(500, 500);
+
+    this.platforms.push(platform1, platform2, platform3, platform4);
+
+    this.platforms.forEach((platform) => {
+      this.addChild(platform);
+    });
 
     this.setInputs();
   }
@@ -38,23 +44,31 @@ export class Game extends Container {
   handleUpdate() {
     this.player.handleUpdate();
 
-    if (Input.keys.a.pressed) {
-      this.player.velocity.x = -5;
-    } else if (Input.keys.d.pressed) {
-      this.player.velocity.x = 5;
-    } else {
-      this.player.velocity.x = 0;
-    }
+    this.platforms.forEach((platform) => {
+      if (Input.keys.a.pressed && this.player.position.x > 100) {
+        this.player.velocity.x = -5;
+      } else if (Input.keys.d.pressed && this.player.position.x < 400) {
+        this.player.velocity.x = 5;
+      } else {
+        this.player.velocity.x = 0;
 
-    if (
-      this.player.position.y + this.player.height <= this.platform.position.y &&
-      this.player.position.y + this.player.height + this.player.velocity.y >=
-        this.platform.position.y &&
-      this.player.position.x + this.player.width >= this.platform.position.x &&
-      this.player.position.x <= this.platform.position.x + this.platform.width
-    ) {
-      this.player.velocity.y = 0;
-    }
+        if (Input.keys.d.pressed) {
+          platform.position.x -= 5;
+        } else if (Input.keys.a.pressed) {
+          platform.position.x += 5;
+        }
+      }
+
+      if (
+        this.player.position.y + this.player.height <= platform.position.y &&
+        this.player.position.y + this.player.height + this.player.velocity.y >=
+          platform.position.y &&
+        this.player.position.x + this.player.width >= platform.position.x &&
+        this.player.position.x <= platform.position.x + platform.width
+      ) {
+        this.player.velocity.y = 0;
+      }
+    });
   }
 
   private setInputs() {
