@@ -28,9 +28,9 @@ export class Game extends Container {
     this.player.position.set(100, 5);
 
     const platform1 = new Platform(200, 200);
-    const platform2 = new Platform(300, 300);
-    const platform3 = new Platform(400, 400);
-    const platform4 = new Platform(500, 500);
+    const platform2 = new Platform(400, 300);
+    const platform3 = new Platform(600, 400);
+    const platform4 = new Platform(800, 500);
 
     this.platforms.push(platform1, platform2, platform3, platform4);
 
