@@ -1,4 +1,5 @@
 import { Container, Graphics } from "pixi.js";
+import { Game } from "./game";
 
 export class Player extends Container {
   velocity = {
@@ -6,9 +7,11 @@ export class Player extends Container {
     y: 0,
   };
   gravity = 0.5;
+  game: Game;
 
-  constructor() {
+  constructor(game: Game) {
     super();
+    this.game = game;
   }
 
   setup() {
@@ -25,7 +28,12 @@ export class Player extends Container {
     if (this.position.y + this.height + this.velocity.y <= 576) {
       this.velocity.y += this.gravity;
     } else {
-      this.velocity.y = 0;
+      this.game.endGame();
     }
+  }
+
+  reset(): void {
+    this.velocity.x = 0;
+    this.velocity.y = 0;
   }
 }

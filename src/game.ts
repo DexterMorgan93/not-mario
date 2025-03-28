@@ -21,6 +21,7 @@ export class Game extends Container {
   platforms: Platform[] = [];
   assetsLoader!: AssetsLoader;
   background: Sprite;
+  gameEnded = false;
 
   constructor(app: Application) {
     super();
@@ -43,17 +44,17 @@ export class Game extends Container {
     const hills = new Sprite(hillsTexture);
     background.addChild(hills);
 
-    this.player = new Player();
+    this.player = new Player(this);
     world.addChild(this.player);
     this.player.setup();
     this.player.position.set(100, 5);
 
     const platform1 = new Platform(0, 455, textures["Platform.png"]);
     const platform2 = new Platform(578, 455, textures["Platform.png"]);
-    const platform3 = new Platform(1156, 455, textures["Platform.png"]);
+    // const platform3 = new Platform(1156, 455, textures["Platform.png"]);
     const platform4 = new Platform(1734, 455, textures["Platform.png"]);
 
-    this.platforms.push(platform1, platform2, platform3, platform4);
+    this.platforms.push(platform1, platform2, platform4);
 
     this.platforms.forEach((platform) => {
       world.addChild(platform);
@@ -64,6 +65,10 @@ export class Game extends Container {
   }
 
   handleUpdate() {
+    if (this.gameEnded) {
+      return;
+    }
+
     this.player.handleUpdate();
 
     this.platforms.forEach((platform) => {
@@ -93,6 +98,21 @@ export class Game extends Container {
         this.player.velocity.y = 0;
       }
     });
+  }
+
+  startGame = (): void => {
+    this.gameEnded = false;
+    this.world.position.x = 0;
+    this.background.position.x = 0;
+    this.player.position.set(0, 0);
+  };
+
+  endGame() {
+    this.gameEnded = true;
+    this.player.reset();
+    setTimeout(() => {
+      this.startGame();
+    }, 500);
   }
 
   private setInputs() {
