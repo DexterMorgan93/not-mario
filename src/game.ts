@@ -17,11 +17,22 @@ export class Game extends Container {
 
   app: Application;
   world: Container;
+  winOffset = 4500;
   player: Player;
   platforms!: Platforms;
   assetsLoader!: AssetsLoader;
   background: Sprite;
   gameEnded = false;
+  moveLevelBounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  moveLevelBoundsOptions = {
+    left: 100,
+    right: 400,
+  };
 
   constructor(app: Application) {
     super();
@@ -59,6 +70,14 @@ export class Game extends Container {
 
     this.world = world;
     this.addChild(world);
+
+    this.moveLevelBounds = {
+      x: this.moveLevelBoundsOptions.left,
+      y: 0,
+      width:
+        this.moveLevelBoundsOptions.right - this.moveLevelBoundsOptions.left,
+      height: 576,
+    };
   }
 
   handleUpdate() {
@@ -72,8 +91,6 @@ export class Game extends Container {
     const worldPlayerRight = worldPlayer.x + this.player.width;
     const worldPlayerBottom = worldPlayer.y + this.player.height;
 
-    this.player.handleUpdate();
-
     if (Input.keys.space.pressed) {
       velocity.y = -jumpSpeed;
     }
@@ -84,14 +101,19 @@ export class Game extends Container {
       velocity.x = moveSpeed;
     } else {
       velocity.x = 0;
+    }
 
-      if (Input.keys.d.pressed) {
-        // platform.position.x -= 5;
-        this.background.position.x -= 2;
-      } else if (Input.keys.a.pressed) {
-        // platform.position.x += 5;
-        this.background.position.x += 2;
-      }
+    const { left, right, bottom, width } = this.player.getBounds();
+
+    // ограничение игрока выхода за пределы мира
+    if (left + velocity.x < this.background.x) {
+      velocity.x = 0;
+      position.x = this.background.x;
+    } else if (right + velocity.x > this.background.width) {
+      velocity.x = 0;
+      position.x = this.background.width - width;
+    } else {
+      position.x += velocity.x;
     }
 
     // взаимодействие с платформами
@@ -109,16 +131,48 @@ export class Game extends Container {
         return true;
       }
     });
+
+    //скроллинг уровня при движении игрока внутри некоторой "зоны движения" (moveLevelBounds), и использование toGlobal() для получения глобальной позиции игрока.
+    const playerGlobal = this.player.toGlobal({ x: 0, y: 0 });
+
+    if (
+      playerGlobal.x + width >
+        this.moveLevelBounds.x + this.moveLevelBounds.width &&
+      velocity.x > 0
+    ) {
+      this.world.pivot.x += velocity.x;
+    } else if (playerGlobal.x < this.moveLevelBounds.x && velocity.x < 0) {
+      this.world.pivot.x += velocity.x;
+    }
+
+    if (this.world.pivot.x < 0) {
+      this.world.pivot.x = 0;
+    }
+
+    if (this.world.pivot.x !== 0) {
+      this.background.pivot.x = -this.world.pivot.x + this.world.pivot.x * 0.5;
+    } else {
+      this.background.pivot.x = 0;
+    }
+
+    if (bottom > this.background.height) {
+      this.endGame();
+    } else {
+      this.player.handleUpdate();
+      if (this.player.x > this.winOffset) {
+        this.endGame();
+      }
+    }
   }
 
   startGame = (): void => {
     this.gameEnded = false;
-    this.world.position.x = 0;
-    this.background.position.x = 0;
+    this.world.pivot.x = 0;
+    this.background.pivot.x = 0;
     this.player.position.set(0, 0);
   };
 
-  endGame() {
+  endGame(): void {
     this.gameEnded = true;
     this.player.reset();
     setTimeout(() => {
