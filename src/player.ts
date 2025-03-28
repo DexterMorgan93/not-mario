@@ -8,6 +8,8 @@ export class Player extends Container {
   };
   gravity = 0.5;
   game: Game;
+  public moveSpeed = 8;
+  public jumpSpeed = 20;
 
   constructor(game: Game) {
     super();

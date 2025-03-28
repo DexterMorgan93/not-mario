@@ -1,12 +1,16 @@
-import { Container, Sprite, Texture } from "pixi.js";
+import { Sprite, Texture } from "pixi.js";
 
-export class Platform extends Container {
-  constructor(positionX: number, positionY: number, platformTexture: Texture) {
-    super();
+export class Platform extends Sprite {
+  id: string;
+  constructor({
+    id,
+    platformTexture,
+  }: {
+    id: string;
+    platformTexture: Texture;
+  }) {
+    super(platformTexture);
 
-    const platformprite = new Sprite(platformTexture);
-
-    this.addChild(platformprite);
-    this.position.set(positionX, positionY);
+    this.id = id;
   }
 }
