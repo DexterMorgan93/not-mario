@@ -1,4 +1,4 @@
-import { Application, Container } from "pixi.js";
+import { Application, Container, Sprite } from "pixi.js";
 import { Player } from "./player";
 import { Platform } from "./platform";
 import { AssetsLoader } from "./assets-loader";
@@ -16,24 +16,37 @@ export class Game extends Container {
   private keyupHandler = this.onKeyUp.bind(this);
 
   app: Application;
+  world: Container;
   player: Player;
   platforms: Platform[] = [];
   assetsLoader!: AssetsLoader;
+  background: Sprite;
 
   constructor(app: Application) {
     super();
     this.app = app;
-
-    this.player = new Player();
-    this.addChild(this.player);
-    this.player.setup();
-    this.player.position.set(100, 5);
+    this.setInputs();
 
     this.assetsLoader = new AssetsLoader();
-
     const {
       spritesheet: { textures },
+      backgroundTexture,
+      hillsTexture,
     } = this.assetsLoader.getAssets();
+
+    const world = new Container();
+
+    const background = new Sprite(backgroundTexture);
+    world.addChild(background);
+    this.background = background;
+
+    const hills = new Sprite(hillsTexture);
+    background.addChild(hills);
+
+    this.player = new Player();
+    world.addChild(this.player);
+    this.player.setup();
+    this.player.position.set(100, 5);
 
     const platform1 = new Platform(0, 455, textures["Platform.png"]);
     const platform2 = new Platform(578, 455, textures["Platform.png"]);
@@ -43,10 +56,11 @@ export class Game extends Container {
     this.platforms.push(platform1, platform2, platform3, platform4);
 
     this.platforms.forEach((platform) => {
-      this.addChildAt(platform, 0);
+      world.addChild(platform);
     });
 
-    this.setInputs();
+    this.world = world;
+    this.addChild(world);
   }
 
   handleUpdate() {
@@ -62,8 +76,10 @@ export class Game extends Container {
 
         if (Input.keys.d.pressed) {
           platform.position.x -= 5;
+          this.background.position.x -= 2;
         } else if (Input.keys.a.pressed) {
           platform.position.x += 5;
+          this.background.position.x += 2;
         }
       }
 
