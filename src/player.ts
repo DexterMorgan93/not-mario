@@ -22,7 +22,7 @@ export class Player extends Container {
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
 
-    if (this.position.y + this.height + this.velocity.y <= 768) {
+    if (this.position.y + this.height + this.velocity.y <= 576) {
       this.velocity.y += this.gravity;
     } else {
       this.velocity.y = 0;
