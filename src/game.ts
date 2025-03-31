@@ -41,7 +41,7 @@ export class Game extends Container {
 
     this.assetsLoader = new AssetsLoader();
     const {
-      spritesheet: { textures },
+      spritesheet: { textures, animations },
       backgroundTexture,
       hillsTexture,
     } = this.assetsLoader.getAssets();
@@ -55,7 +55,15 @@ export class Game extends Container {
     const hills = new Sprite(hillsTexture);
     background.addChild(hills);
 
-    this.player = new Player(this);
+    this.player = new Player({
+      game: this,
+      textures: {
+        idleLeftTexture: animations.PlayerStandLeft,
+        idleRightTexture: animations.PlayerStandRight,
+        runLeftTexture: animations.PlayerRunLeft,
+        runRightTexture: animations.PlayerRunRight,
+      },
+    });
     world.addChild(this.player);
     this.player.setup();
     this.player.position.set(100, 5);
