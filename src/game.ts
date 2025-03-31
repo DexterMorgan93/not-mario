@@ -119,6 +119,7 @@ export class Game extends Container {
     // взаимодействие с платформами
     this.platforms.children.forEach((platform) => {
       const worldPlatform = platform.position;
+
       const worldPlatformRight = worldPlatform.x + platform.width;
       if (
         worldPlayerRight >= worldPlatform.x &&
